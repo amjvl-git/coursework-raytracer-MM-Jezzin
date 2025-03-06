@@ -48,13 +48,19 @@ class Vec3
     }
 
     // Calculate and return the magnitude of this vector
-    magnitude() {}
+    magnitude() {
+        return (sqrt(this.x * this.x + this.y * this.y + this.z * this.z))
+    }
     
     // Calculate and return the magnitude of this vector without the square root
-    magnitudeSquared() {}
+    magnitudeSquared() {
+        return (this.x * this.x + this.y * this.y + this.z * this.z)
+    }
 
     // Return a normalised version of this vector
     normalised() {
+        
+        
         // let mag = sqrt(this.x * this.x + this.y * this.y + this.z * this.z)
         //let scaled = scalar / mag
         //return new Vec3(this.x * scaled, this.y * scaled, this.z * scaled)
