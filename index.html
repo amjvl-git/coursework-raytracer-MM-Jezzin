@@ -61,9 +61,9 @@ class Vec3
     normalised() {
         
         
-        // let mag = sqrt(this.x * this.x + this.y * this.y + this.z * this.z)
-        //let scaled = scalar / mag
-        //return new Vec3(this.x * scaled, this.y * scaled, this.z * scaled)
+        let mag = sqrt(this.x * this.x + this.y * this.y + this.z * this.z)
+        let scaled = 1 / mag
+        return new Vec3(this.x * scaled, this.y * scaled, this.z * scaled)
     }
 }
 
@@ -81,7 +81,9 @@ class Sphere
     // a quadratic equation and return the t value of the ray for that point
     // If two solutions exist return the minus solution
     // If no solutions exist return -1
-    rayIntersects(ray)  {}
+    rayIntersects(ray)  {
+        
+    }
 }
 
 // Ray which has an origin and direction, both are Vec3s
@@ -94,7 +96,9 @@ class Ray
     }
 
     // Calculate and return the point in space (a Vec3) for this ray for the given value of t
-    pointAt(t) {}
+    pointAt(t) {
+        return Vec3(origin + (direction * t))
+    }
 }
 
 // The result of casting a ray into our scene
