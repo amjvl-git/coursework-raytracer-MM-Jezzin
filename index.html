@@ -49,7 +49,7 @@ class Vec3
 
     // Calculate and return the magnitude of this vector
     magnitude() {
-        return (sqrt(this.x * this.x + this.y * this.y + this.z * this.z))
+        return Math.sqrt(this.x * this.x + this.y * this.y + this.z * this.z)
     }
     
     // Calculate and return the magnitude of this vector without the square root
@@ -61,7 +61,7 @@ class Vec3
     normalised() {
         
         
-        let mag = sqrt(this.x * this.x + this.y * this.y + this.z * this.z)
+        let mag = Math.sqrt(this.x * this.x + this.y * this.y + this.z * this.z)
         let scaled = 1 / mag
         return new Vec3(this.x * scaled, this.y * scaled, this.z * scaled)
     }
@@ -81,8 +81,49 @@ class Sphere
     // a quadratic equation and return the t value of the ray for that point
     // If two solutions exist return the minus solution
     // If no solutions exist return -1
-    rayIntersects(ray)  {
+    rayIntersects(ray) {
+
         
+        // Vector from ray origin to sphere center
+    const vector = ray.origin.minus(this.centre);
+
+    // Quadratic coefficients
+    const a = ray.direction.dot(ray.direction);
+    const b = 2 * ray.direction.dot(vector);
+    const c = vector.dot(vector) - this.radius * this.radius;
+
+    // Discriminant
+    const discriminant = b * b - 4 * a * c;
+
+    // If the discriminant is negative, no intersection
+    if (discriminant < 0) {
+        return -1;
+    }
+
+    // Calculate the square root of the discriminant
+    const sqrtDiscriminant = Math.sqrt(discriminant);
+
+    // Solve the quadratic equation
+    const t1 = (-b - sqrtDiscriminant) / (2 * a);
+    const t2 = (-b + sqrtDiscriminant) / (2 * a);
+
+    // If both solutions are positive, return the smaller one
+    if (t1 > 0 && t2 > 0) {
+        return Math.min(t1, t2);
+    }
+
+    // If only t1 is positive, return t1
+    if (t1 > 0) {
+        return t1;
+    }
+
+    // If only t2 is positive, return t2
+    if (t2 > 0) {
+        return t2;
+    }
+
+    // If both solutions are negative, return -1 as no intersection in the positive direction
+    return -1;
     }
 }
 
@@ -97,7 +138,7 @@ class Ray
 
     // Calculate and return the point in space (a Vec3) for this ray for the given value of t
     pointAt(t) {
-        return Vec3(origin + (direction * t))
+        return this.origin.add(this.direction.scale(t));
     }
 }
 
@@ -118,7 +159,10 @@ class RayCastResult
 }
 
 // Calculate the intersection point and normal when a ray hits a sphere. Returns a RayCastResult.
-function hit(ray, t, sphereIndex) {}
+function hit(ray, t, sphereIndex) 
+{
+    return new RayCastResult(intersectionPoint, intersectionNormal, t, sphereIndex)
+}
 
 // Return a RayCastResult when a ray misses everything in the scene
 function miss()
@@ -129,15 +173,31 @@ function miss()
 // Check whether a ray hits anything in the scene and return a RayCast Result
 function traceRay(ray)
 {
-    return miss()
+   let t = Infinity; //Setting t to infinity lol
+   let closestSphereIndex = -1;
+
+   //Find the sphere intersection closest to this ray
+   for (let i = 0; i < spheres.length; i++)
+   {
+        const current_t = spheres[i].rayIntersects(ray);
+        if(current_t > 0 && current_t < t)
+        {
+            t = current_t;
+            closestSphereIndex = i;
+        }
+   }
+
+   if(closestSphereIndex < 0) return miss()
+
+   return hit(ray, t, closestSphereIndex)
 }
 
 // Calculate and return the background colour based on the ray
 function backgroundColour(ray)
 {
         let white = new Vec3(1, 1, 1)
-        let blue = new Vec3(0,3,0.5,0.9)
-        t = 0,5*(ray.direction.y + 1.0)
+        let blue = new Vec3(0.3, 0.5, 0.9)
+        t = 0.5*(ray.direction.y + 1.0)
         return white.scale(1-t).add(blue.scale(t))
 }
 
@@ -146,7 +206,12 @@ function rayColour(ray)
 {
     let castResult = traceRay(ray)
     if(castResult.t < 0) return backgroundColour(ray)
-    return new Vec3(1,0,0) // Red
+    
+    let albedo = spheres[castResult.sphereIndex].colour
+    let diffuse = Math.max(castResult.normal.dot(negLightDirection),0)
+    let colour = albedo.scale(diffuse)
+
+    return colour
 }
 
 // Sets a pixel at (x, y) in the canvas with an RGB Vec3
@@ -162,7 +227,7 @@ const spheres = new Array(
     new Sphere(new Vec3(0,0,-1), 0.3, new Vec3(1,0,0)),       // Red sphere
     new Sphere(new Vec3(0,0.2,-0.8), 0.15, new Vec3(0,0,1)),  // Blue sphere
     new Sphere(new Vec3(0,-100.5,-1), 100, new Vec3(0,1,0))   // Big green sphere
-    );
+);
 
 
 // Main code
@@ -174,7 +239,10 @@ let viewportWidth = 2
 let viewportHeight = viewportWidth * aspectRatio
 let focalLength = 1.0
 
-let camPosition = new Vec3(0,0,0)
+let lightDirection = new Vec3(-1.1,-1.3,-1.5).normalised();
+let negLightDirection = new Vec3( -lightDirection.x, -lightDirection.y, -lightDirection.z)
+
+let camPosition = new Vec3(-1,-1,0)
 let horizontal = new Vec3(viewportWidth, 0, 0)
 let vertical = new Vec3(0, viewportHeight, 0)
 let lowerLeftCorner = camPosition.minus(horizontal.scale(0.5)).minus(vertical.scale(0.5)).minus(new Vec3(0,0, focalLength))
