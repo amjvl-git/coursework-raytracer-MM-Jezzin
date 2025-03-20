@@ -84,46 +84,58 @@ class Sphere
     rayIntersects(ray) {
 
         
-        // Vector from ray origin to sphere center
-        const vector = ray.origin.minus(this.centre);
+        //vector from ray origin to sphere center
+        const vectorX = ray.origin.x - this.centre.x;
+        const vectorY = ray.origin.y - this.centre.y;
+        const vectorZ = ray.origin.z - this.centre.z;
 
-        // Quadratic coefficients
-        const a = ray.direction.dot(ray.direction);
-        const b = 2 * ray.direction.dot(vector);
-        const c = vector.dot(vector) - this.radius * this.radius;
+        //dot product of ray direction with itself
+        const a = (ray.direction.x * ray.direction.x) +
+          (ray.direction.y * ray.direction.y) +
+          (ray.direction.z * ray.direction.z);
 
-        // Discriminant
+        //dot product of ray direction with the vector
+        const b = 2 * ((ray.direction.x * vectorX) +
+               (ray.direction.y * vectorY) +
+               (ray.direction.z * vectorZ));
+
+        //dot product of the vector with itself
+        const c = (vectorX * vectorX) +
+              (vectorY * vectorY) +
+              (vectorZ * vectorZ) - (this.radius * this.radius);
+
+         // Adding the bit of the eqation as "Discriminant" so the code looks nicer lol.
         const discriminant = b * b - 4 * a * c;
 
         // If the discriminant is negative, no intersection
-        if (discriminant < 0) {
+            if (discriminant < 0) {
             return -1;
-        }
+            }
 
-        // Calculate the square root of the discriminant
-        const sqrtDiscriminant = Math.sqrt(discriminant);
+             // Calculate the square root of the discriminant
+            const sqrtDiscriminant = Math.sqrt(discriminant);
 
-        // Solve the quadratic equation
-        const t1 = (-b - sqrtDiscriminant) / (2 * a);
-        const t2 = (-b + sqrtDiscriminant) / (2 * a);
+            // Solve the quadratic equation
+            const t1 = (-b - sqrtDiscriminant) / (2 * a);
+            const t2 = (-b + sqrtDiscriminant) / (2 * a);
 
-        // If both solutions are positive, return the smaller one
-        if (t1 > 0 && t2 > 0) {
-            return Math.min(t1, t2);
-        }
+            // If both solutions are positive, return the smaller one as there is one intersection?
+            if (t1 > 0 && t2 > 0) {
+                return Math.min(t1, t2);
+            }
 
-        // If only t1 is positive, return t1
-        if (t1 > 0) {
-            return t1;
-        }
+            // If only t1 is positive, return t1
+            if (t1 > 0) {
+                return t1;
+            }
 
-        // If only t2 is positive, return t2
-        if (t2 > 0) {
-            return t2;
-        }
+            // If only t2 is positive, return t2
+            if (t2 > 0) {
+                return t2;
+            }
 
-        // If both solutions are negative, return -1 as no intersection in the positive direction
-        return -1;
+            // If both solutions are negative,return -1 as no intersection in the positive direction
+            return -1;
         }
 }
 
